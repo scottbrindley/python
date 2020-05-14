@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 @title
 Kayak Flight Trawler
@@ -12,6 +11,9 @@ The following flight is used as an example:
 
 @author
 Scott
+
+@date
+14/05/2020
 """
 import pandas as pd
 from datetime import datetime
