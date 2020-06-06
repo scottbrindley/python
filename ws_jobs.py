@@ -23,6 +23,9 @@ from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import ElementNotInteractableException
 import re
 import time
+import pandas as pd
+from datetime import datetime
+import csv
 
 driver = webdriver.Chrome()
 driver.implicitly_wait(30)
@@ -34,12 +37,13 @@ driver.get(url)
 soup = BeautifulSoup(driver.page_source, 'html.parser')
 container = soup.find("td", id="resultsCol")
 #print(container)
-keywords = ['python', 'sas', 'git', 'sql', 'hadoop', 'dev ops', 'scala', 'java', 'agile', 'aws', 'azure', 'elastic'
-            ,'solr', 'salt', 'puppet', 'ansible', 'zookeeper', 'accumulo', 'kafka', 'mongodb', 'neo4'
-            ,'cassandra', 'apache', 'infosphere', 'oracle', 'zeromq', 'orientdb', 'cloud'
-            ,'c++', 'powerbi', 'tableau', 'matlab', 'r', 'matplotlib', 'c#', 'hue', 'cloudera', 'qlik', 'unix', 'powershell'
-            ,'bitbucket', 'hive', 'pyspark', 'exce;', 'spark', 'ssis', 'vba', 'r', 'python3', 'bigquery', 'airflow', 'azkaban'
-            , 'jira']
+# import keywords
+keywords = []
+with open(r'C:\Users\scott\Documents\Python\data\tech_key_words.csv', newline='') as f:
+    reader = csv.reader(f)
+    for row in reader:
+        keywords.append(row[0])
+        
 JobName, Keyword = [],[]  
 
 # loop through each job card returned by web page search
@@ -73,7 +77,7 @@ for j in jobs:
     # now the job box should have loaded, we can go and find the specific job details
     soup_lev2 = BeautifulSoup(driver.page_source, 'html.parser')  
     job_desc = soup_lev2.find("div", id="vjs-desc")    
-    # each jpb box should have a conistent id name, but sometimes this isn't the case (not sure why, some html thing)
+    # each job box should have a conistent id name, but sometimes this isn't the case (not sure why, some html thing)
     if job_desc is not None:
         job_title = soup_lev2.find("div", id="vjs-jobtitle")
         print("    ", job_title.text)        
@@ -88,10 +92,13 @@ for j in jobs:
         print("Cannot find job details on web page")
         
     
-    
-    
+data_tuples = list(zip(JobName,Keyword))  
+df = pd.DataFrame(data_tuples, columns=['Job Title','keyword'])
+df = df.drop_duplicates()
 
+# add datestamp
+df["ExtractDate"] = datetime.today().strftime("%d/%m/%Y")
+df["ExtractTime"] = datetime.today().strftime("%H:%M:%S")
 
-
-
-
+# export to csv
+df.to_csv(r"C:\Users\scott\Documents\Python\data\job_tracker.csv", mode="a", header=False, index=False)   
