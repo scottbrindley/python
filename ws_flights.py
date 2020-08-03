@@ -19,10 +19,13 @@ import pandas as pd
 from datetime import datetime
 from bs4 import BeautifulSoup
 from selenium import webdriver
+import time
 
+#chrome driver has been installed in C:\Users\scott\AppData\Local\Programs\Python\Python37\Scripts
 driver = webdriver.Chrome()
 url = "https://www.kayak.co.uk/flights/LON-BNE/2021-01-12/2021-01-26/2adults?sort=bestflight_a"
 driver.get(url)
+
 #soup = BeautifulSoup(driver.page_source, 'lxml')
 soup = BeautifulSoup(driver.page_source, "html.parser")
 # print out contents of text returned by BeautifulSoup object
@@ -30,6 +33,11 @@ soup = BeautifulSoup(driver.page_source, "html.parser")
 # get last element of a list
 # x = departure[1]
 
+# Wait for 10 seconds
+print("Wait 10 seconds for Chrome to load page")
+time.sleep(10)
+
+# we will store all fllghts found in this list
 allFlights = []
 # find the box containing all the flight results
 container = soup.find(id='searchResultsList')
@@ -63,7 +71,7 @@ for w in wrapper:
     allFlights.append(flightResult)    
 
 # close the selenium web browser        
-#driver.quit()
+driver.quit()
     
 # store results in a dataframe, to allow easy export to csv
 df = pd.DataFrame(allFlights,columns=['outboundDepartureTime','returnDepartureTime', 'outboundArrivalTime', 

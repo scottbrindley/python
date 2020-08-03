@@ -72,14 +72,13 @@ for j in jobs:
             # there is a banner that hovers over the link on the Indeed page which makes link unclickable, so click on this banner first to get rid of it
             try:
                 e = driver.find_element_by_xpath('//button[text()="Dismiss"]')
-            except (NoSuchElementException):
-                print("Dismiss cookie button not loaded by website. Ignore this and continue ")
-                bannerClicked = True
-                continue
-            if e is not None:
                 print("Try to click on Dismiss button")
                 e.click()
                 bannerClicked = True
+            except (NoSuchElementException):
+                print("Dismiss cookie button not loaded by website. Ignore this and continue ")
+                bannerClicked = True                
+                
             
         # now click on job click
         job_link = driver.find_element_by_id(id3_)       
@@ -89,7 +88,7 @@ for j in jobs:
         except (ElementNotInteractableException, ElementClickInterceptedException):           
             print("Cannot click on the link. Dumping the exception stack for debugging...")
             traceback.print_exc()
-            continue
+            exit()
     # job hyperlink cannot be opened, so skip to next job
     else:
         print("Cannot find job details on web page")
@@ -148,6 +147,7 @@ df["ExtractDate"] = datetime.today().strftime("%d/%m/%Y")
 df["ExtractTime"] = datetime.today().strftime("%H:%M:%S")
 
 # export to csv
+print("Exporting output")
 df.to_csv(r"C:\Users\scott\Documents\Python\data\job_tracker.csv", mode="a", header=False, index=False)   
 
 # summarise
