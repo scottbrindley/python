@@ -24,8 +24,8 @@ import re
 import pandas as pd
 from datetime import datetime
 import traceback
+import sys
 
-bannerClicked = False
 driver = webdriver.Chrome()
 driver.implicitly_wait(30)
 url = "https://www.indeed.co.uk/jobs?q=Data+engineer+analyst&l=london"
@@ -68,27 +68,25 @@ for j in jobs:
         print("Parsing element", id3_, "...")
     
         # click on job link, which brings up a new box on Indeed     
-        if bannerClicked == False:
-            # there is a banner that hovers over the link on the Indeed page which makes link unclickable, so click on this banner first to get rid of it
-            try:
-                e = driver.find_element_by_xpath('//button[text()="Dismiss"]')
-                print("Try to click on Dismiss button")
-                e.click()
-                bannerClicked = True
-            except (NoSuchElementException):
-                print("Dismiss cookie button not loaded by website. Ignore this and continue ")
-                bannerClicked = True                
-                
+        # there is a banner that hovers over the link on the Indeed page which makes link unclickable, so click on this banner first to get rid of it
+        try:
+            # find by xpath searches for text displayed on the button
+            e = driver.find_element_by_xpath('//button[text()="Accept All Cookies"]')
+            print("Try to click on Dismiss button")
+            e.click()
+        except (NoSuchElementException, ElementNotInteractableException):
+            print("Dismiss cookie button not loaded by website. Ignore this and continue ")              
+            
             
         # now click on job click
         job_link = driver.find_element_by_id(id3_)       
         try:                      
             job_link.click()           
-        # if link click fails, then skip to next job listing            
+        # if job link click fails, then abort           
         except (ElementNotInteractableException, ElementClickInterceptedException):           
             print("Cannot click on the link. Dumping the exception stack for debugging...")
             traceback.print_exc()
-            exit()
+            sys.exit()
     # job hyperlink cannot be opened, so skip to next job
     else:
         print("Cannot find job details on web page")
@@ -147,7 +145,7 @@ df["ExtractDate"] = datetime.today().strftime("%d/%m/%Y")
 df["ExtractTime"] = datetime.today().strftime("%H:%M:%S")
 
 # export to csv
-print("Exporting output")
+print("Saving data to file")
 df.to_csv(r"C:\Users\scott\Documents\Python\data\job_tracker.csv", mode="a", header=False, index=False)   
 
 # summarise
